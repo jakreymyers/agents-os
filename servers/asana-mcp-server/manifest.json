@@ -1,0 +1,147 @@
+{
+  "dxt_version": "0.1",
+  "name": "asana-mcp-server",
+  "display_name": "Asana MCP Server",
+  "version": "1.8.0",
+  "description": "Comprehensive Model Context Protocol server for Asana project management integration",
+  "long_description": "A comprehensive Model Context Protocol server that provides read and write access to Asana workspaces, projects, and tasks. This server enables LLMs to manage projects, create and update tasks, track progress, and collaborate effectively within Asana. Features 22 tools covering workspace exploration, project management, task operations, status updates, and team collaboration. Perfect for AI-powered project management and workflow automation.",
+  "icon": "icon.png",
+  "author": {
+    "name": "Christian Roy / agents-os",
+    "url": "https://github.com/jakreymyers/agents-os"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jakreymyers/agents-os.git"
+  },
+  "homepage": "https://github.com/jakreymyers/agents-os/tree/main/servers/asana-mcp-server",
+  "documentation": "https://github.com/jakreymyers/agents-os/tree/main/servers/asana-mcp-server#readme",
+  "support": "https://github.com/jakreymyers/agents-os/issues",
+  "keywords": ["asana", "project-management", "mcp", "api", "automation", "productivity", "tasks", "collaboration"],
+  "license": "MIT",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"],
+      "env": {
+        "ASANA_ACCESS_TOKEN": "${user_config.access_token}",
+        "ASANA_READ_ONLY": "${user_config.read_only}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "asana_list_workspaces",
+      "description": "List all accessible Asana workspaces"
+    },
+    {
+      "name": "asana_get_tags_for_workspace",
+      "description": "Retrieve tags in a workspace"
+    },
+    {
+      "name": "asana_search_projects",
+      "description": "Search projects with name pattern matching"
+    },
+    {
+      "name": "asana_get_project",
+      "description": "Retrieve detailed project information"
+    },
+    {
+      "name": "asana_get_project_task_counts",
+      "description": "Get number of tasks in a project"
+    },
+    {
+      "name": "asana_get_project_sections",
+      "description": "List project sections"
+    },
+    {
+      "name": "asana_get_project_status",
+      "description": "Retrieve a specific project status"
+    },
+    {
+      "name": "asana_get_project_statuses",
+      "description": "Get all project status updates"
+    },
+    {
+      "name": "asana_create_project_status",
+      "description": "Create a new project status"
+    },
+    {
+      "name": "asana_delete_project_status",
+      "description": "Remove a project status"
+    },
+    {
+      "name": "asana_search_tasks",
+      "description": "Advanced task searching with multiple filters"
+    },
+    {
+      "name": "asana_get_task",
+      "description": "Retrieve detailed task information"
+    },
+    {
+      "name": "asana_create_task",
+      "description": "Create a new task"
+    },
+    {
+      "name": "asana_update_task",
+      "description": "Modify existing task details"
+    },
+    {
+      "name": "asana_create_subtask",
+      "description": "Add a subtask to an existing task"
+    },
+    {
+      "name": "asana_get_multiple_tasks_by_gid",
+      "description": "Retrieve multiple task details"
+    },
+    {
+      "name": "asana_set_parent_for_task",
+      "description": "Modify task's parent relationship"
+    },
+    {
+      "name": "asana_get_task_stories",
+      "description": "Retrieve task comments/stories"
+    },
+    {
+      "name": "asana_create_task_story",
+      "description": "Add a comment to a task"
+    },
+    {
+      "name": "asana_add_task_dependencies",
+      "description": "Set task dependencies"
+    },
+    {
+      "name": "asana_add_task_dependents",
+      "description": "Set task dependents"
+    },
+    {
+      "name": "asana_get_tasks_for_tag",
+      "description": "Retrieve tasks associated with a tag"
+    }
+  ],
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=20.0.0"
+    }
+  },
+  "user_config": {
+    "access_token": {
+      "type": "string",
+      "title": "Asana Access Token",
+      "description": "Your Asana Personal Access Token. Create one at https://app.asana.com/0/my-apps with appropriate permissions for your workspace.",
+      "sensitive": true,
+      "required": true
+    },
+    "read_only": {
+      "type": "boolean",
+      "title": "Read Only Mode",
+      "description": "Run the server in read-only mode to prevent any modifications to your Asana data.",
+      "default": false,
+      "required": false
+    }
+  }
+}

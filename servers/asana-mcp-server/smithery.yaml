@@ -1,0 +1,28 @@
+# Smithery configuration file: https://smithery.ai/docs/build/project-config/smithery-yaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - asanaAccessToken
+    properties:
+      asanaAccessToken:
+        type: string
+        description: The Asana Personal Access Token for API authentication.
+      readOnly:
+        type: boolean
+        description: Whether to run the server in read-only mode (prevents modifications).
+        default: false
+  commandFunction:
+    # A function that produces the CLI command to start the MCP on stdio.
+    |-
+    (config) => ({
+      command: 'node', 
+      args: ['dist/index.js'], 
+      env: {
+        ASANA_ACCESS_TOKEN: config.asanaAccessToken,
+        ASANA_READ_ONLY: config.readOnly ? 'true' : 'false'
+      }
+    })
