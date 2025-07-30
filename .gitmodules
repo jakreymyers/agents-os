@@ -1,0 +1,3 @@
+[submodule "servers/airtable-mcp-server"]
+	path = servers/airtable-mcp-server
+	url = https://github.com/domdomegg/airtable-mcp-server.git
