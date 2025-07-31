@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "slack-oauth": {
+      "command": "node", 
+      "args": [
+        "/path/to/agents-os/servers/slack-mcp-server/dist/enhanced-index.js"
+      ],
+      "env": {
+        "SLACK_CLIENT_ID": "your_slack_client_id",
+        "SLACK_CLIENT_SECRET": "your_slack_client_secret",
+        "SLACK_REDIRECT_URI": "http://localhost:3000/oauth/slack/callback",
+        "SLACK_TEAM_ID": "T01234567",
+        "SLACK_CHANNEL_IDS": "C01234567,C76543210"
+      }
+    }
+  }
+}

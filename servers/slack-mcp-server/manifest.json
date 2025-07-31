@@ -1,0 +1,62 @@
+{
+  "name": "slack-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for Slack API integration",
+  "homepage": "https://github.com/agents-os/slack-mcp-server",
+  "author": "agents-os",
+  "license": "MIT",
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false
+  },
+  "tools": [
+    {
+      "name": "slack_list_channels",
+      "description": "List public or pre-defined channels in the workspace"
+    },
+    {
+      "name": "slack_post_message", 
+      "description": "Post a new message to a Slack channel"
+    },
+    {
+      "name": "slack_reply_to_thread",
+      "description": "Reply to a specific message thread"
+    },
+    {
+      "name": "slack_add_reaction",
+      "description": "Add an emoji reaction to a message"
+    },
+    {
+      "name": "slack_get_channel_history",
+      "description": "Get recent messages from a channel"
+    },
+    {
+      "name": "slack_get_thread_replies",
+      "description": "Get all replies in a message thread"
+    },
+    {
+      "name": "slack_get_users",
+      "description": "Get list of workspace users with basic profile information"
+    },
+    {
+      "name": "slack_get_user_profile",
+      "description": "Get detailed profile information for a specific user"
+    }
+  ],
+  "configuration": {
+    "required": [
+      "SLACK_BOT_TOKEN",
+      "SLACK_TEAM_ID"
+    ],
+    "optional": [
+      "SLACK_CHANNEL_IDS"
+    ]
+  },
+  "tags": [
+    "slack",
+    "communication",
+    "messaging",
+    "workplace"
+  ]
+}
