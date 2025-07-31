@@ -101,3 +101,6 @@ dist
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Reports folder - contains generated analysis reports
+servers/airtable-mcp-server/reports/

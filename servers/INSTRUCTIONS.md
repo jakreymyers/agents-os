@@ -14,6 +14,72 @@ This document provides specific guidance for Claude Code agents on how to effect
 - Use the `detailLevel` parameter in table operations to control response size
 - Filter searches with `maxRecords` parameter to avoid overwhelming responses
 
+### Working with IS Project Portfolio Analytics Base
+
+#### Key Tables and Their Purpose:
+1. **Tasks & Projects (Asana Sync)** (`tbllXxQcFRUcpmzbr`)
+   - Contains all tasks synced from Asana
+   - Key fields: Task Name, Completed At, IS Teams, Projects (Boards), Assignee
+   
+2. **Teams** (`tbl2M5h4QS9wF8KId`)
+   - Lists all IS teams with their record IDs
+   - Use to find team record IDs for filtering
+   
+3. **Boards (Asana Sync)** (`tblaFOALbimrnHCz1`)
+   - Contains project/board information
+   - Links to tasks via Projects (Boards) field
+
+#### Important Team Record IDs:
+- **Digital Services**: `reci4tTMnYLWNf2b7`
+- **Data Platform**: `recreOnvEOfz4W0YS`
+- **Web Solutions**: `recuHLDCQrKITD1fu`
+- **Prepublication Systems**: `rec0sS2cEnat2Mwjb`
+- **Product Development & Delivery**: `rec2jT8eO71sTCGoJ`
+- **InfoSys Leadership**: `recMr3yEKDfw60eI5`
+- **Enterprise Architecture**: `recoFRW29ZFuCMGvq`
+- **Salesforce/Nimble**: `rec9IPM075hkxJGUF`
+- **Customer Experience**: `recofSbR8PwHauvpA`
+- **Technical Operations**: `recmMhaCysor4wnI7`
+
+#### Filtering Tasks by Team and Date:
+```javascript
+// Example filterByFormula for finding team tasks in a date range:
+AND(
+  FIND("teamRecordId", ARRAYJOIN({IS Teams})), 
+  AND(
+    IS_AFTER({Completed At}, "YYYY-MM-DD"), 
+    IS_BEFORE({Completed At}, "YYYY-MM-DD")
+  )
+)
+```
+
+#### Tips for Efficient Searches:
+1. **Use Team Record IDs**: When filtering by team, use the exact record ID in FIND() function
+2. **Date Filtering**: Use IS_AFTER and IS_BEFORE for date ranges
+3. **Multiple Teams**: IS Teams field is an array - use ARRAYJOIN() to search it
+4. **Project Associations**: Projects (Boards) field contains array of project record IDs
+
+#### Common Query Patterns:
+1. **Get all tasks for a team in a month**:
+   ```
+   filterByFormula: AND(FIND("teamRecordId", ARRAYJOIN({IS Teams})), AND(IS_AFTER({Completed At}, "2025-05-31"), IS_BEFORE({Completed At}, "2025-07-01")))
+   ```
+
+2. **Search by text across all fields**:
+   ```
+   Use search_records with searchTerm parameter for text-based searches
+   ```
+
+3. **Get team information**:
+   ```
+   Query Teams table directly with team record ID
+
+#### Response Size Management:
+- If you get "response exceeds maximum allowed tokens" error:
+  - Use `maxRecords` parameter (e.g., 50 or 100)
+  - Use specific field filtering with search_records
+  - Break queries into smaller date ranges
+
 ## Asana MCP Server
 
 ### Critical Learning: Search Tasks Function Limitations
