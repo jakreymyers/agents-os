@@ -45,4 +45,4 @@ set +a  # Stop auto-exporting
 
 echo -e "${GREEN}✅ Environment variables loaded and exported${NC}"
 echo -e "${BLUE}Now you can start Claude Code with:${NC} ${GREEN}claude${NC}"
-echo -e "${YELLOW}Your Airtable and Asana MCP servers will be available via /mcp${NC}"
+echo -e "${YELLOW}Your Airtable, Asana, and Slack MCP servers will be available via /mcp${NC}"
