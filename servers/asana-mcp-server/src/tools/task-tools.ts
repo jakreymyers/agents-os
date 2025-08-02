@@ -18,83 +18,87 @@ export const searchTasksTool: Tool = {
         type: "string",
         description: "Filter by task subtype (e.g. milestone)"
       },
-      "portfolios_any": {
+      "portfolios.any": {
         type: "string",
         description: "Comma-separated list of portfolio IDs"
       },
-      "assignee_any": {
+      "assignee.any": {
         type: "string",
         description: "Comma-separated list of user IDs"
       },
-      "assignee_not": {
+      "assignee.not": {
         type: "string",
         description: "Comma-separated list of user IDs to exclude"
       },
-      "projects_any": {
+      "projects.any": {
         type: "string",
         description: "Comma-separated list of project IDs"
       },
-      "projects_not": {
+      "projects.not": {
         type: "string",
         description: "Comma-separated list of project IDs to exclude"
       },
-      "projects_all": {
+      "projects.all": {
         type: "string",
         description: "Comma-separated list of project IDs that must all match"
       },
-      "sections_any": {
+      "sections.any": {
         type: "string",
         description: "Comma-separated list of section IDs"
       },
-      "sections_not": {
+      "sections.not": {
         type: "string",
         description: "Comma-separated list of section IDs to exclude"
       },
-      "sections_all": {
+      "sections.all": {
         type: "string",
         description: "Comma-separated list of section IDs that must all match"
       },
-      "tags_any": {
+      "tags.any": {
         type: "string",
         description: "Comma-separated list of tag IDs"
       },
-      "tags_not": {
+      "tags.not": {
         type: "string",
         description: "Comma-separated list of tag IDs to exclude"
       },
-      "tags_all": {
+      "tags.all": {
         type: "string",
         description: "Comma-separated list of tag IDs that must all match"
       },
-      "teams_any": {
+      "teams.any": {
         type: "string",
         description: "Comma-separated list of team IDs"
       },
-      "followers_not": {
+      "followers.not": {
         type: "string",
         description: "Comma-separated list of user IDs to exclude"
       },
-      "created_by_any": {
+      "followers.any": {
         type: "string",
         description: "Comma-separated list of user IDs"
       },
-      "created_by_not": {
-        type: "string",
-        description: "Comma-separated list of user IDs to exclude"
-      },
-      "assigned_by_any": {
+      "created_by.any": {
         type: "string",
         description: "Comma-separated list of user IDs"
       },
-      "assigned_by_not": {
+      "created_by.not": {
         type: "string",
         description: "Comma-separated list of user IDs to exclude"
       },
-      "liked_by_not": {
+      "assigned_by.any": {
+        type: "string",
+        description: "Comma-separated list of user IDs"
+      },
+      "assigned_by.not": {
         type: "string",
         description: "Comma-separated list of user IDs to exclude"
       },
-      "commented_on_by_not": {
+      "liked_by.not": {
+        type: "string",
+        description: "Comma-separated list of user IDs to exclude"
+      },
+      "commented_on_by.not": {
         type: "string",
         description: "Comma-separated list of user IDs to exclude"
       },
@@ -102,19 +106,19 @@ export const searchTasksTool: Tool = {
         type: "string",
         description: "ISO 8601 date string or null"
       },
-      "due_on_before": {
+      "due_on.before": {
         type: "string",
         description: "ISO 8601 date string"
       },
-      "due_on_after": {
+      "due_on.after": {
         type: "string",
         description: "ISO 8601 date string"
       },
-      "due_at_before": {
+      "due_at.before": {
         type: "string",
         description: "ISO 8601 datetime string"
       },
-      "due_at_after": {
+      "due_at.after": {
         type: "string",
         description: "ISO 8601 datetime string"
       },
@@ -122,11 +126,11 @@ export const searchTasksTool: Tool = {
         type: "string",
         description: "ISO 8601 date string or null"
       },
-      "start_on_before": {
+      "start_on.before": {
         type: "string",
         description: "ISO 8601 date string"
       },
-      "start_on_after": {
+      "start_on.after": {
         type: "string",
         description: "ISO 8601 date string"
       },
@@ -134,38 +138,39 @@ export const searchTasksTool: Tool = {
         type: "string",
         description: "ISO 8601 date string or null"
       },
-      "created_on_before": {
+      "created_on.before": {
         type: "string",
         description: "ISO 8601 date string"
       },
-      "created_on_after": {
+      "created_on.after": {
         type: "string",
         description: "ISO 8601 date string"
       },
-      "created_at_before": {
+      "created_at.before": {
         type: "string",
         description: "ISO 8601 datetime string"
       },
-      "created_at_after": {
+      "created_at.after": {
         type: "string",
         description: "ISO 8601 datetime string"
       },
       "completed_on": {
         type: "string",
-        description: "ISO 8601 date string or null"},
-      "completed_on_before": {
+        description: "ISO 8601 date string or null"
+      },
+      "completed_on.before": {
         type: "string",
         description: "ISO 8601 date string"
       },
-      "completed_on_after": {
+      "completed_on.after": {
         type: "string",
         description: "ISO 8601 date string"
       },
-      "completed_at_before": {
+      "completed_at.before": {
         type: "string",
         description: "ISO 8601 datetime string"
       },
-      "completed_at_after": {
+      "completed_at.after": {
         type: "string",
         description: "ISO 8601 datetime string"
       },
@@ -173,19 +178,19 @@ export const searchTasksTool: Tool = {
         type: "string",
         description: "ISO 8601 date string or null"
       },
-      "modified_on_before": {
+      "modified_on.before": {
         type: "string",
         description: "ISO 8601 date string"
       },
-      "modified_on_after": {
+      "modified_on.after": {
         type: "string",
         description: "ISO 8601 date string"
       },
-      "modified_at_before": {
+      "modified_at.before": {
         type: "string",
         description: "ISO 8601 datetime string"
       },
-      "modified_at_after": {
+      "modified_at.after": {
         type: "string",
         description: "ISO 8601 datetime string"
       },

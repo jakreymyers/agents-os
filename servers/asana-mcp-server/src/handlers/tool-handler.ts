@@ -1,20 +1,20 @@
 import { Tool, CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { AsanaClientWrapper } from './asana-client-wrapper.js';
-import { validateAsanaXml } from './asana-validate-xml.js';
+import { AsanaClientWrapper } from '../core/client.js';
+import { validateAsanaXml } from '../validators/html-validator.js';
 
-import { listWorkspacesTool } from './tools/workspace-tools.js';
+import { listWorkspacesTool } from '../tools/workspace-tools.js';
 import {
   searchProjectsTool,
   getProjectTool,
   getProjectTaskCountsTool,
   getProjectSectionsTool
-} from './tools/project-tools.js';
+} from '../tools/project-tools.js';
 import {
   getProjectStatusTool,
   getProjectStatusesForProjectTool,
   createProjectStatusTool,
   deleteProjectStatusTool
-} from './tools/project-status-tools.js';
+} from '../tools/project-status-tools.js';
 import {
   searchTasksTool,
   getTaskTool,
@@ -22,17 +22,17 @@ import {
   updateTaskTool,
   createSubtaskTool,
   getMultipleTasksByGidTool
-} from './tools/task-tools.js';
-import { getTasksForTagTool, getTagsForWorkspaceTool } from './tools/tag-tools.js';
+} from '../tools/task-tools.js';
+import { getTasksForTagTool, getTagsForWorkspaceTool } from '../tools/tag-tools.js';
 import {
   addTaskDependenciesTool,
   addTaskDependentsTool,
   setParentForTaskTool
-} from './tools/task-relationship-tools.js';
+} from '../tools/task-relationship-tools.js';
 import {
   getStoriesForTaskTool,
   createTaskStoryTool
-} from './tools/story-tools.js';
+} from '../tools/story-tools.js';
 
 // List of all available tools
 const all_tools: Tool[] = [

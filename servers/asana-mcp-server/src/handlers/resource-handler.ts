@@ -4,7 +4,7 @@ import {
   ReadResourceResult,
   ReadResourceRequest
 } from "@modelcontextprotocol/sdk/types.js";
-import { AsanaClientWrapper } from './asana-client-wrapper.js';
+import { AsanaClientWrapper } from '../core/client.js';
 
 export function createResourceHandlers(asanaClient: AsanaClientWrapper) {
   /**

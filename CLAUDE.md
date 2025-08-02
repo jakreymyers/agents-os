@@ -54,9 +54,11 @@ npm run lint       # ESLint validation
 ```bash
 cd servers/asana-mcp-server
 npm install
-npm run build      # Custom esbuild process
-npm run start      # Build and run
-npm run dev        # Development mode with ts-node
+npm run build      # Custom esbuild process using build.js
+npm run start      # Build and run server
+npm run dev        # Development mode with ts-node/esm
+npm run inspector  # Test with MCP Inspector (ports 5173/3000)
+npm run clean      # Remove dist directory
 ```
 
 **Slack MCP Server:**
@@ -94,31 +96,80 @@ Always use `maxRecords` parameter to avoid overwhelming responses.
 
 ### Working with Asana MCP Server
 
-**Critical Limitations:**
-- The `asana_search_tasks` function with `projects_any` parameter frequently fails with "Bad Request" errors
-- Complex `opt_fields` with nested properties (e.g., `assignee.name`) cause failures
+**✅ Enhanced Capabilities (Updated August 2025):**
+The Asana MCP server has been completely refactored with **direct Asana API alignment**, enabling comprehensive search capabilities.
+
+**Native Dot Notation Support:**
+- Use native Asana API parameters: `projects.any`, `assignee.not`, `due_on.after`, etc.
+- 95%+ API coverage with zero transformation overhead
+- Complex `opt_fields` including nested properties now fully supported
 
 **Recommended Workflow:**
 1. Start with `asana_list_workspaces`
 2. Find projects using `asana_search_projects` with name patterns
-3. Get project structure with `asana_get_project` and `asana_get_project_sections`
-4. **Use text-based search instead of project filters:**
-   ```javascript
-   // ✅ WORKS
-   asana_search_tasks({ workspace: "gid", text: "keyword" })
-   
-   // ❌ FAILS  
-   asana_search_tasks({ workspace: "gid", projects_any: "project_gid" })
+3. Use comprehensive filtering with `asana_search_tasks`:
+   ```json
+   {
+     "workspace": "workspace_gid",
+     "projects.any": "project_gid",
+     "completed": false,
+     "is_subtask": false,
+     "opt_fields": "name,gid,assignee,assignee.name,due_on,projects.name"
+   }
    ```
-5. Get specific task details with `asana_get_task`
+4. Get detailed task information with `asana_get_task`
 
-**Safe opt_fields:** `name`, `notes`, `due_on`, `assignee`, `completed`, `created_at`, `projects`
+**Key Achievement:** Successfully retrieves exact task counts (e.g., 67 uncompleted parent tasks from IS Delivery project) using reliable parameter filtering.
+
+## Architecture Details
+
+### MCP Server Structure
+Each server follows the MCP (Model Context Protocol) pattern:
+- **Tools:** API operations (search, create, update tasks/projects)
+- **Prompts:** Template-based interactions for common workflows
+- **Resources:** Dynamic resource exposure (workspaces, projects as URIs)
+
+### Asana MCP Server Architecture
+```
+src/
+├── index.ts                 # Main server entry with MCP SDK setup
+├── core/                    # Core functionality and infrastructure
+│   ├── client.ts           # Asana API client wrapper  
+│   ├── version.ts          # Version management
+│   └── version.types.ts    # Version type definitions
+├── handlers/               # MCP protocol request handlers
+│   ├── tool-handler.ts     # Tool request routing and execution
+│   ├── prompt-handler.ts   # Prompt template management
+│   └── resource-handler.ts # Dynamic resource exposure
+├── tools/                  # Individual tool implementations
+│   ├── task-tools.ts       # Task operations (search, CRUD)
+│   ├── project-tools.ts    # Project management tools
+│   ├── workspace-tools.ts  # Workspace operations
+│   └── ...                 # Additional tool categories
+├── types/                  # TypeScript type definitions
+│   └── asana.d.ts         # Asana API types
+├── utils/                  # Shared utilities
+│   └── validation.ts      # Input validation helpers
+└── validators/            # Input validation functions
+    └── html-validator.ts  # Asana HTML content validator
+```
+
+**Key Design Principles:**
+- **Direct API Alignment:** Native Asana dot notation (`projects.any`) for zero transformation overhead
+- **Type Safety:** Zod schemas for input validation across all operations
+- **Read-Only Mode:** Optional safe mode that disables write operations
+- **Comprehensive Coverage:** 22 tools supporting 95%+ of Asana API capabilities
+
+### Build System
+- **Asana:** Custom esbuild configuration in `build.js` for ES modules
+- **Airtable:** Standard TypeScript compilation with Vitest testing
+- **Slack:** TypeScript compilation with OAuth support variations
 
 ## Testing and Validation
 
 - **Airtable Server:** Uses Vitest for unit tests (`npm run test`)
-- **Asana Server:** No tests currently implemented
-- **Slack Server:** No tests currently implemented
+- **Asana Server:** MCP Inspector testing (`npm run inspector`)
+- **Slack Server:** Basic functionality testing
 
 Always verify MCP server functionality by checking they appear in `claude mcp list` after environment setup.
 

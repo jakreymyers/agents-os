@@ -40,55 +40,37 @@ export class AsanaClientWrapper {
   }
 
   async searchTasks(workspace: string, searchOpts: any = {}) {
-    // Extract known parameters
-    const {
-      text,
-      resource_subtype,
-      completed,
-      is_subtask,
-      has_attachment,
-      is_blocked,
-      is_blocking,
-      sort_by,
-      sort_ascending,
-      opt_fields,
-      ...otherOpts
-    } = searchOpts;
+    // Build search parameters directly - no parameter mapping needed
+    // Asana API accepts dot notation parameters directly
+    const searchParams: any = { ...searchOpts };
 
-    // Build search parameters
-    const searchParams: any = {
-      ...otherOpts // Include any additional filter parameters
-    };
-
-    // Handle custom fields if provided
-    if (searchOpts.custom_fields) {
-      if ( typeof searchOpts.custom_fields == "string" ) {
-        try {
-          searchOpts.custom_fields = JSON.parse( searchOpts.custom_fields );
-        } catch ( err ) {
-          if (err instanceof Error) {
-            err.message = "custom_fields must be a JSON object : " + err.message;
-          }
-          throw err;
+    // Handle custom fields if provided as JSON string
+    if (searchOpts.custom_fields && typeof searchOpts.custom_fields === "string") {
+      try {
+        searchParams.custom_fields = JSON.parse(searchOpts.custom_fields);
+      } catch (err) {
+        if (err instanceof Error) {
+          err.message = "custom_fields must be a JSON object : " + err.message;
         }
+        throw err;
       }
-      Object.entries(searchOpts.custom_fields).forEach(([key, value]) => {
-        searchParams[`custom_fields.${key}`] = value;
+    }
+
+    // Custom fields object handling - expand nested properties to dot notation
+    if (searchParams.custom_fields && typeof searchParams.custom_fields === "object") {
+      Object.entries(searchParams.custom_fields).forEach(([key, value]) => {
+        if (typeof value === "object" && value !== null) {
+          // Handle nested custom field operations: { "field_id": { "operation": "value" } }
+          Object.entries(value as Record<string, any>).forEach(([operation, operationValue]) => {
+            searchParams[`custom_fields.${key}.${operation}`] = operationValue;
+          });
+        } else {
+          // Handle direct value assignment: { "field_id": "value" }
+          searchParams[`custom_fields.${key}.value`] = value;
+        }
       });
       delete searchParams.custom_fields; // Remove the custom_fields object since we've processed it
     }
-
-    // Add optional parameters if provided
-    if (text) searchParams.text = text;
-    if (resource_subtype) searchParams.resource_subtype = resource_subtype;
-    if (completed !== undefined) searchParams.completed = completed;
-    if (is_subtask !== undefined) searchParams.is_subtask = is_subtask;
-    if (has_attachment !== undefined) searchParams.has_attachment = has_attachment;
-    if (is_blocked !== undefined) searchParams.is_blocked = is_blocked;
-    if (is_blocking !== undefined) searchParams.is_blocking = is_blocking;
-    if (sort_by) searchParams.sort_by = sort_by;
-    if (sort_ascending !== undefined) searchParams.sort_ascending = sort_ascending;
-    if (opt_fields) searchParams.opt_fields = opt_fields;
 
     const response = await this.tasks.searchTasksForWorkspace(workspace, searchParams);
 

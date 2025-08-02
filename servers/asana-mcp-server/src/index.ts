@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { VERSION } from './version.js';
+import { VERSION } from './core/version.js';
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { tool_handler, list_of_tools } from './tool-handler.js';
+import { tool_handler, list_of_tools } from './handlers/tool-handler.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -12,9 +12,9 @@ import {
   ListResourceTemplatesRequestSchema,
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { AsanaClientWrapper } from './asana-client-wrapper.js'
-import { createPromptHandlers } from './prompt-handler.js';
-import { createResourceHandlers } from './resource-handler.js';
+import { AsanaClientWrapper } from './core/client.js'
+import { createPromptHandlers } from './handlers/prompt-handler.js';
+import { createResourceHandlers } from './handlers/resource-handler.js';
 
 async function main() {
   const asanaToken = process.env.ASANA_ACCESS_TOKEN;
