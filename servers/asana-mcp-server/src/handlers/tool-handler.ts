@@ -2,6 +2,46 @@ import { Tool, CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk
 import { AsanaClientWrapper } from '../core/client.js';
 import { validateAsanaXml } from '../validators/html-validator.js';
 
+// Phase 2: Enhanced validation imports
+import { ErrorHandlers } from '../utils/error-handler.js';
+import { 
+  validateSearchTasksParams,
+  validateSearchProjectsParams,
+  validateListWorkspacesParams
+} from '../schemas/search-schemas.js';
+import {
+  GetTaskSchema,
+  CreateTaskSchema,
+  UpdateTaskSchema,
+  GetMultipleTasksByGidSchema,
+  CreateSubtaskSchema,
+  AddTaskDependenciesSchema,
+  AddTaskDependentsSchema,
+  SetParentForTaskSchema,
+  GetTaskStoriesSchema,
+  CreateTaskStorySchema,
+  GetProjectSchema,
+  GetProjectTaskCountsSchema,
+  GetProjectSectionsSchema,
+  GetProjectStatusSchema,
+  GetProjectStatusesForProjectSchema,
+  CreateProjectStatusSchema,
+  DeleteProjectStatusSchema,
+  GetTasksForTagSchema,
+  GetTagsForWorkspaceSchema,
+  ListWorkspacesSchema,
+  ToolValidation,
+  // Phase 3: Bulk operations schemas
+  UpdateMultipleTasksSchema,
+  ExecuteBatchSchema,
+  CreateMultipleTasksSchema,
+  AssignMultipleTasksSchema,
+  CompleteMultipleTasksSchema,
+  // Phase 3: Goals and portfolios schemas
+  // GetGoalsSchema, // temporarily disabled
+  GetPortfoliosSchema
+} from '../schemas/tool-schemas.js';
+
 import { listWorkspacesTool } from '../tools/workspace-tools.js';
 import {
   searchProjectsTool,
@@ -34,8 +74,41 @@ import {
   createTaskStoryTool
 } from '../tools/story-tools.js';
 
-// List of all available tools
+// Phase 3: Enhanced features imports
+import {
+  updateMultipleTasksTool,
+  executeBatchTool,
+  createMultipleTasksTool,
+  assignMultipleTasksTool,
+  completeMultipleTasksTool
+} from '../tools/bulk-tools.js';
+// Goals functionality temporarily disabled - uncomment to reactivate
+// import {
+//   getGoalsTool,
+//   getGoalTool,
+//   createGoalTool,
+//   updateGoalTool,
+//   deleteGoalTool,
+//   addGoalSupportersTool,
+//   removeGoalSupportersTool,
+//   getParentGoalsTool
+// } from '../tools/goals-tools.js';
+import {
+  getPortfoliosTool,
+  getPortfolioTool,
+  createPortfolioTool,
+  updatePortfolioTool,
+  deletePortfolioTool,
+  getPortfolioItemsTool,
+  addPortfolioItemsTool,
+  removePortfolioItemsTool,
+  addPortfolioMembersTool,
+  removePortfolioMembersTool
+} from '../tools/portfolios-tools.js';
+
+// List of all available tools (Phase 1 & 2 + Phase 3 enhanced features)
 const all_tools: Tool[] = [
+  // Phase 1 & 2: Core tools
   listWorkspacesTool,
   searchProjectsTool,
   searchTasksTool,
@@ -58,12 +131,42 @@ const all_tools: Tool[] = [
   setParentForTaskTool,
   getTasksForTagTool,
   getTagsForWorkspaceTool,
+  
+  // Phase 3: Bulk operations tools
+  updateMultipleTasksTool,
+  executeBatchTool,
+  createMultipleTasksTool,
+  assignMultipleTasksTool,
+  completeMultipleTasksTool,
+  
+  // Phase 3: Goals tools (temporarily disabled - uncomment to reactivate)
+  // getGoalsTool,
+  // getGoalTool,
+  // createGoalTool,
+  // updateGoalTool,
+  // deleteGoalTool,
+  // addGoalSupportersTool,
+  // removeGoalSupportersTool,
+  // getParentGoalsTool,
+  
+  // Phase 3: Portfolios tools
+  getPortfoliosTool,
+  getPortfolioTool,
+  createPortfolioTool,
+  updatePortfolioTool,
+  deletePortfolioTool,
+  getPortfolioItemsTool,
+  addPortfolioItemsTool,
+  removePortfolioItemsTool,
+  addPortfolioMembersTool,
+  removePortfolioMembersTool,
 ];
 
-// List of tools that only read Asana state
+// List of tools that only read Asana state (Phase 1 & 2 + Phase 3 read-only tools)
 const READ_ONLY_TOOLS = [
+  // Phase 1 & 2: Core read-only tools
   'asana_list_workspaces',
-  'asana_search_projects',
+  'asana_search_projects', 
   'asana_search_tasks',
   'asana_get_task',
   'asana_get_task_stories',
@@ -74,7 +177,17 @@ const READ_ONLY_TOOLS = [
   'asana_get_project_sections',
   'asana_get_multiple_tasks_by_gid',
   'asana_get_tasks_for_tag',
-  'asana_get_tags_for_workspace'
+  'asana_get_tags_for_workspace',
+  
+  // Phase 3: Goals read-only tools (temporarily disabled - uncomment to reactivate)
+  // 'asana_get_goals',
+  // 'asana_get_goal',
+  // 'asana_get_parent_goals',
+  
+  // Phase 3: Portfolios read-only tools
+  'asana_get_portfolios',
+  'asana_get_portfolio',
+  'asana_get_portfolio_items'
 ];
 
 // Filter tools based on READ_ONLY_MODE
@@ -88,7 +201,8 @@ export const list_of_tools = isReadOnlyMode
 export function tool_handler(asanaClient: AsanaClientWrapper): (request: CallToolRequest) => Promise<CallToolResult> {
   return async (request: CallToolRequest) => {
     console.error("Received CallToolRequest:", request);
-    try {
+    
+    return ErrorHandlers.safeOperation(async () => {
       if (!request.params.arguments) {
         throw new Error("No arguments provided");
       }
@@ -102,14 +216,22 @@ export function tool_handler(asanaClient: AsanaClientWrapper): (request: CallToo
 
       switch (request.params.name) {
         case "asana_list_workspaces": {
-          const response = await asanaClient.listWorkspaces(args);
+          // Phase 2: Validate parameters
+          const validatedArgs = ErrorHandlers.validateParams(
+            ListWorkspacesSchema,
+            args,
+            "asana_list_workspaces"
+          );
+          const response = await asanaClient.listWorkspaces(validatedArgs);
           return {
             content: [{ type: "text", text: JSON.stringify(response) }],
           };
         }
 
         case "asana_search_projects": {
-          const { workspace, name_pattern, archived = false, ...opts } = args;
+          // Phase 2: Validate parameters
+          const validatedArgs = validateSearchProjectsParams(args);
+          const { workspace, name_pattern, archived = false, ...opts } = validatedArgs;
           const response = await asanaClient.searchProjects(
             workspace,
             name_pattern,
@@ -122,7 +244,9 @@ export function tool_handler(asanaClient: AsanaClientWrapper): (request: CallToo
         }
 
         case "asana_search_tasks": {
-          const { workspace, ...searchOpts } = args;
+          // Phase 2: Validate parameters with comprehensive schema
+          const validatedArgs = validateSearchTasksParams(args);
+          const { workspace, ...searchOpts } = validatedArgs;
           const response = await asanaClient.searchTasks(workspace, searchOpts);
           return {
             content: [{ type: "text", text: JSON.stringify(response) }],
@@ -130,7 +254,13 @@ export function tool_handler(asanaClient: AsanaClientWrapper): (request: CallToo
         }
 
         case "asana_get_task": {
-          const { task_id, ...opts } = args;
+          // Phase 2: Validate parameters
+          const validatedArgs = ErrorHandlers.validateParams(
+            GetTaskSchema,
+            args,
+            "asana_get_task"
+          );
+          const { task_id, ...opts } = validatedArgs;
           const response = await asanaClient.getTask(task_id, opts);
           return {
             content: [{ type: "text", text: JSON.stringify(response) }],
@@ -138,42 +268,32 @@ export function tool_handler(asanaClient: AsanaClientWrapper): (request: CallToo
         }
 
         case "asana_create_task": {
-          const { project_id, ...taskData } = args;
+          // Phase 2: Enhanced validation with HTML checking
+          const validatedArgs = ToolValidation.validateTaskCreation(args);
+          const { project_id, ...taskData } = validatedArgs;
+          
           try {
             const response = await asanaClient.createTask(project_id, taskData);
             return {
               content: [{ type: "text", text: JSON.stringify(response) }],
             };
           } catch (error) {
-            // When error occurs and html_notes was provided, validate it
+            // Enhanced error handling with validation context
             if (taskData.html_notes && error instanceof Error && [400, 500].includes(error.status)) {
               const xmlValidationErrors = validateAsanaXml(taskData.html_notes);
               if (xmlValidationErrors.length > 0) {
-                // Provide detailed validation errors to help the user
                 return {
                   content: [{
                     type: "text",
-                    text: JSON.stringify({
-                      error: error instanceof Error ? error.message : String(error),
-                      validation_errors: xmlValidationErrors,
-                      message: "The HTML notes contain invalid XML formatting. Please check the validation errors above."
-                    })
-                  }],
-                };
-              } else {
-                // HTML is valid, something else caused the error
-                return {
-                  content: [{
-                    type: "text",
-                    text: JSON.stringify({
-                      error: error instanceof Error ? error.message : String(error),
-                      html_notes_validation: "The HTML notes format is valid. The error must be related to something else."
-                    })
+                    text: JSON.stringify(ErrorHandlers.createErrorResponse({
+                      message: "HTML validation failed",
+                      validationErrors: xmlValidationErrors
+                    }, "create task"))
                   }],
                 };
               }
             }
-            throw error; // re-throw to be caught by the outer try/catch
+            throw error; // Let ErrorHandlers.safeOperation handle it
           }
         }
 
@@ -423,25 +543,235 @@ export function tool_handler(asanaClient: AsanaClientWrapper): (request: CallToo
           };
         }
 
+        // ============================================================================
+        // PHASE 3: BULK OPERATIONS TOOLS
+        // ============================================================================
+
+        case "asana_update_multiple_tasks": {
+          const validatedArgs = ErrorHandlers.validateParams(
+            UpdateMultipleTasksSchema,
+            args,
+            "asana_update_multiple_tasks"
+          );
+          const { task_ids, updates } = validatedArgs;
+          const response = await asanaClient.updateMultipleTasks(task_ids, updates);
+          return {
+            content: [{ type: "text", text: JSON.stringify(response) }],
+          };
+        }
+
+        case "asana_execute_batch": {
+          const validatedArgs = ErrorHandlers.validateParams(
+            ExecuteBatchSchema,
+            args,
+            "asana_execute_batch"
+          );
+          const { actions } = validatedArgs;
+          const response = await asanaClient.executeBatch(actions);
+          return {
+            content: [{ type: "text", text: JSON.stringify(response) }],
+          };
+        }
+
+        case "asana_create_multiple_tasks": {
+          const validatedArgs = ErrorHandlers.validateParams(
+            CreateMultipleTasksSchema,
+            args,
+            "asana_create_multiple_tasks"
+          );
+          const { project_id, tasks } = validatedArgs;
+          
+          // Create batch actions for multiple task creation
+          const actions = tasks.map(taskData => ({
+            method: "POST",
+            relative_path: "/tasks",
+            data: {
+              ...taskData,
+              projects: [project_id]
+            }
+          }));
+          
+          const response = await asanaClient.executeBatch(actions);
+          return {
+            content: [{ type: "text", text: JSON.stringify(response) }],
+          };
+        }
+
+        case "asana_assign_multiple_tasks": {
+          const validatedArgs = ErrorHandlers.validateParams(
+            AssignMultipleTasksSchema,
+            args,
+            "asana_assign_multiple_tasks"
+          );
+          const { assignments } = validatedArgs;
+          
+          // Create batch actions for multiple task assignments
+          const actions = assignments.map(({ task_id, assignee }) => ({
+            method: "PUT",
+            relative_path: `/tasks/${task_id}`,
+            data: { assignee }
+          }));
+          
+          const response = await asanaClient.executeBatch(actions);
+          return {
+            content: [{ type: "text", text: JSON.stringify(response) }],
+          };
+        }
+
+        case "asana_complete_multiple_tasks": {
+          const validatedArgs = ErrorHandlers.validateParams(
+            CompleteMultipleTasksSchema,
+            args,
+            "asana_complete_multiple_tasks"
+          );
+          const { task_ids, completed } = validatedArgs;
+          const response = await asanaClient.updateMultipleTasks(task_ids, { completed });
+          return {
+            content: [{ type: "text", text: JSON.stringify(response) }],
+          };
+        }
+
+        // ============================================================================
+        // PHASE 3: GOALS TOOLS (TEMPORARILY DISABLED - UNCOMMENT TO REACTIVATE)
+        // ============================================================================
+
+        // case "asana_get_goals": {
+        //   const validatedArgs = ErrorHandlers.validateParams(
+        //     GetGoalsSchema,
+        //     args,
+        //     "asana_get_goals"
+        //   );
+        //   const { workspace, ...opts } = validatedArgs;
+        //   const response = await asanaClient.getGoals(workspace, opts);
+        //   return {
+        //     content: [{ type: "text", text: JSON.stringify(response) }],
+        //   };
+        // }
+
+        // case "asana_get_goal": {
+        //   const { goal_gid, ...opts } = args;
+        //   try {
+        //     const goals = new (require('asana')).GoalsApi();
+        //     const response = await goals.getGoal(goal_gid, opts);
+        //     return {
+        //       content: [{ type: "text", text: JSON.stringify(response.data) }],
+        //     };
+        //   } catch (error) {
+        //     throw new Error(`Failed to get goal: ${error instanceof Error ? error.message : String(error)}`);
+        //   }
+        // }
+
+        // case "asana_create_goal": {
+        //   const { workspace, ...goalData } = args;
+        //   try {
+        //     const goals = new (require('asana')).GoalsApi();
+        //     const response = await goals.createGoal({ data: goalData });
+        //     return {
+        //       content: [{ type: "text", text: JSON.stringify(response.data) }],
+        //     };
+        //   } catch (error) {
+        //     throw new Error(`Failed to create goal: ${error instanceof Error ? error.message : String(error)}`);
+        //   }
+        // }
+
+        // case "asana_update_goal": {
+        //   const { goal_gid, ...goalData } = args;
+        //   try {
+        //     const goals = new (require('asana')).GoalsApi();
+        //     const response = await goals.updateGoal({ data: goalData }, goal_gid);
+        //     return {
+        //       content: [{ type: "text", text: JSON.stringify(response.data) }],
+        //     };
+        //   } catch (error) {
+        //     throw new Error(`Failed to update goal: ${error instanceof Error ? error.message : String(error)}`);
+        //   }
+        // }
+
+        // case "asana_delete_goal": {
+        //   const { goal_gid } = args;
+        //   try {
+        //     const goals = new (require('asana')).GoalsApi();
+        //     const response = await goals.deleteGoal(goal_gid);
+        //     return {
+        //       content: [{ type: "text", text: JSON.stringify(response.data) }],
+        //     };
+        //   } catch (error) {
+        //     throw new Error(`Failed to delete goal: ${error instanceof Error ? error.message : String(error)}`);
+        //   }
+        // }
+
+        // ============================================================================
+        // PHASE 3: PORTFOLIOS TOOLS
+        // ============================================================================
+
+        case "asana_get_portfolios": {
+          const validatedArgs = ErrorHandlers.validateParams(
+            GetPortfoliosSchema,
+            args,
+            "asana_get_portfolios"
+          );
+          const { workspace, ...opts } = validatedArgs;
+          const response = await asanaClient.getPortfolios(workspace, opts);
+          return {
+            content: [{ type: "text", text: JSON.stringify(response) }],
+          };
+        }
+
+        case "asana_get_portfolio": {
+          const { portfolio_gid, ...opts } = args;
+          try {
+            const portfolios = new (require('asana')).PortfoliosApi();
+            const response = await portfolios.getPortfolio(portfolio_gid, opts);
+            return {
+              content: [{ type: "text", text: JSON.stringify(response.data) }],
+            };
+          } catch (error) {
+            throw new Error(`Failed to get portfolio: ${error instanceof Error ? error.message : String(error)}`);
+          }
+        }
+
+        case "asana_create_portfolio": {
+          const { workspace, ...portfolioData } = args;
+          try {
+            const portfolios = new (require('asana')).PortfoliosApi();
+            const response = await portfolios.createPortfolio({ data: { ...portfolioData, workspace } });
+            return {
+              content: [{ type: "text", text: JSON.stringify(response.data) }],
+            };
+          } catch (error) {
+            throw new Error(`Failed to create portfolio: ${error instanceof Error ? error.message : String(error)}`);
+          }
+        }
+
+        case "asana_update_portfolio": {
+          const { portfolio_gid, ...portfolioData } = args;
+          try {
+            const portfolios = new (require('asana')).PortfoliosApi();
+            const response = await portfolios.updatePortfolio({ data: portfolioData }, portfolio_gid);
+            return {
+              content: [{ type: "text", text: JSON.stringify(response.data) }],
+            };
+          } catch (error) {
+            throw new Error(`Failed to update portfolio: ${error instanceof Error ? error.message : String(error)}`);
+          }
+        }
+
+        case "asana_delete_portfolio": {
+          const { portfolio_gid } = args;
+          try {
+            const portfolios = new (require('asana')).PortfoliosApi();
+            const response = await portfolios.deletePortfolio(portfolio_gid);
+            return {
+              content: [{ type: "text", text: JSON.stringify(response.data) }],
+            };
+          } catch (error) {
+            throw new Error(`Failed to delete portfolio: ${error instanceof Error ? error.message : String(error)}`);
+          }
+        }
+
         default:
           throw new Error(`Unknown tool: ${request.params.name}`);
       }
-    } catch (error) {
-      console.error("Error executing tool:", error);
-
-      // Default error response
-      const errorResponse = {
-        error: error instanceof Error ? error.message : String(error),
-      };
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(errorResponse),
-          },
-        ],
-      };
-    }
+    }, `tool execution: ${request.params.name}`);
   };
 }
